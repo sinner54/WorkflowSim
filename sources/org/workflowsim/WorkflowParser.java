@@ -93,7 +93,8 @@ public final class WorkflowParser {
         Double arrivalTime = CloudSim.clock();
         if (this.daxPath != null) {
             parseXmlFile(arrivalTime, this.daxPath);
-        } else if (this.daxPaths != null) {
+        }
+        if (this.daxPaths != null) {
             int i = 0;
             for (String path : this.daxPaths) {
                 if( i == 0){

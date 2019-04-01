@@ -217,7 +217,7 @@ public final class WorkflowEngine extends SimEntity {
     protected void processJobReturn(SimEvent ev) {
 
         Job job = (Job) ev.getData();
-
+//        Log.printLine(Parameters.df.format(CloudSim.clock())+"job"+job.getCloudletId()+" has completed");
         if (job.getCloudletStatus() == Cloudlet.FAILED) {
             // Reclusteringengine will add retry job to jobList
             int newId = getJobsList().size() + getJobsSubmittedList().size();

@@ -118,7 +118,7 @@ public class DynamicWorkloadExample1 extends WorkflowSimBasicExample1 {
             /**
              * Initialize static parameters
              */
-            Parameters.init(vmNum, daxPaths, null,
+            Parameters.init(vmNum,daxPath, null,
                     null, op, cp, sch_method, pln_method,
                     null, 0);
             DistributionGenerator tempDistributionGenerator = new DistributionGenerator(DistributionGenerator.DistributionFamily.WEIBULL, 0.9d, 3);
