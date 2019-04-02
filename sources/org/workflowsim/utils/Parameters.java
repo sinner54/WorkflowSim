@@ -29,7 +29,7 @@ import org.cloudbus.cloudsim.Log;
  */
 public class Parameters {
 
-    public static final String daxFilePath="E:\\WorkflowSim\\config\\dax\\";
+    public static final String daxFilePath="E:\\myprojects\\WorkflowSim\\config\\dax\\";
     
     /*
      * Scheduling Algorithm (Local Scheduling Algorithm)
@@ -178,7 +178,7 @@ public class Parameters {
     /**
      * The default cost model is based on datacenter, similar to CloudSim
      */
-    private static CostModel costModel = CostModel.DATACENTER;
+    private static CostModel costModel = CostModel.VM;
 
 
     /**

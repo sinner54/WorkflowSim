@@ -64,6 +64,7 @@ public final class WorkflowEngine extends SimEntity {
     private List<Integer> schedulerId;
     private List<WorkflowScheduler> scheduler;
 
+
     /**
      * Created a new WorkflowEngine object.
      *
@@ -315,7 +316,9 @@ public final class WorkflowEngine extends SimEntity {
         }
         /**
          * If we have multiple schedulers. Divide them equally.
+         * 更正：每个任务调度到对应的scheduler
          */
+
         for (int i = 0; i < getSchedulers().size(); i++) {
 
             List submittedList = allocationList.get(getSchedulerId(i));
@@ -357,6 +360,7 @@ public final class WorkflowEngine extends SimEntity {
      */
     @Override
     public void shutdownEntity() {
+
         Log.printLine(Parameters.df.format(CloudSim.clock())+getName() + " is shutting down...");
     }
 

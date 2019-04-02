@@ -194,9 +194,9 @@ public class WorkflowScheduler extends DatacenterBroker {
              */
             if (VmList.getById(getVmList(), vmId) != null) {
                 getVmsCreatedList().add(VmList.getById(getVmList(), vmId));
-                Log.printLine(CloudSim.clock() + ": " + getName() + ": VM #" + vmId
-                        + " has been created in Datacenter #" + datacenterId + ", Host #"
-                        + VmList.getById(getVmsCreatedList(), vmId).getHost().getId());
+//                Log.printLine(CloudSim.clock() + ": " + getName() + ": VM #" + vmId
+//                        + " has been created in Datacenter #" + datacenterId + ", Host #"
+//                        + VmList.getById(getVmsCreatedList(), vmId).getHost().getId());
             }
         } else {
             Log.printLine(CloudSim.clock() + ": " + getName() + ": Creation of VM #" + vmId
@@ -241,7 +241,6 @@ public class WorkflowScheduler extends DatacenterBroker {
         BaseSchedulingAlgorithm scheduler = getScheduler(Parameters.getSchedulingAlgorithm());
         scheduler.setCloudletList(getCloudletList());
         scheduler.setVmList(getVmsCreatedList());
-
         try {
             scheduler.run();
         } catch (Exception e) {
@@ -284,6 +283,10 @@ public class WorkflowScheduler extends DatacenterBroker {
         getCloudletSubmittedList().remove(cloudlet);
 
         CondorVM vm = (CondorVM) getVmsCreatedList().get(cloudlet.getVmId());
+        double tempClock = CloudSim.clock();
+        if (tempClock > vm.getFinishTime()) {
+            vm.setFinishTime(tempClock);
+        }
         //so that this resource is released
         vm.setState(WorkflowSimTags.VM_STATUS_IDLE);
 

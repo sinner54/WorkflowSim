@@ -15,8 +15,11 @@
  */
 package org.workflowsim;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
 import org.cloudbus.cloudsim.Cloudlet;
 import org.cloudbus.cloudsim.CloudletScheduler;
 import org.cloudbus.cloudsim.Consts;
@@ -29,6 +32,7 @@ import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.VmAllocationPolicy;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
+import org.cloudbus.cloudsim.core.SimEntity;
 import org.cloudbus.cloudsim.core.SimEvent;
 import org.workflowsim.utils.ReplicaCatalog;
 import org.workflowsim.utils.Parameters;
@@ -45,12 +49,20 @@ import org.workflowsim.utils.Parameters.FileType;
  */
 public class WorkflowDatacenter extends Datacenter {
 
+
+    private double interTraffic = 0;
+
+    private Map<Integer,WorkflowDatacenter> intercloud = new HashMap<>();
     public WorkflowDatacenter(String name,
             DatacenterCharacteristics characteristics,
             VmAllocationPolicy vmAllocationPolicy,
             List<Storage> storageList,
             double schedulingInterval) throws Exception {
         super(name, characteristics, vmAllocationPolicy, storageList, schedulingInterval);
+    }
+
+    public void setIntercloud_bandwidth(Integer workflowDatacenterId,WorkflowDatacenter bandwidth){
+        intercloud.put(workflowDatacenterId,bandwidth);
     }
 
     /**
@@ -105,6 +117,10 @@ public class WorkflowDatacenter extends Datacenter {
             Host host = getVmAllocationPolicy().getHost(vmId, userId);
             CondorVM vm = (CondorVM) host.getVm(vmId, userId);
 
+            double tempClock = CloudSim.clock();
+            if (tempClock < vm.getStartTime()) {
+                vm.setStartTime(tempClock);
+            }
             switch (Parameters.getCostModel()) {
                 case DATACENTER:
                     // process this Cloudlet to this CloudResource
@@ -272,15 +288,35 @@ public class WorkflowDatacenter extends Datacenter {
                                 requiredFileStagein = false;
                                 break;
                             }
-                            double bwth;
+                            double bwth = 0;
                             if (site.equals(Parameters.SOURCE)) {
                                 //transfers from the source to the VM is limited to the VM bw only
                                 bwth = vm.getBw();
                                 //bwth = dcStorage.getBaseBandwidth();
-                            } else {
-                                //transfers between two VMs is limited to both VMs
-                                bwth = Math.min(vm.getBw(), getVmAllocationPolicy().getHost(Integer.parseInt(site), userId).getVm(Integer.parseInt(site), userId).getBw());
-                                //bwth = dcStorage.getBandwidth(Integer.parseInt(site), vmId);
+                            }else{
+                                //根据文件名找到对应的前驱任务，获得前驱任务的vmId，userId，以及云间的通信带宽
+                                List<Job> parentJobs  = job.getParentList();
+                                double tempBwth = vm.getBw();
+                                for(Job tempJob:parentJobs){
+                                    List<FileItem> outputFileItems = tempJob.getFileList();
+                                    for(FileItem fileItem:outputFileItems){
+                                        if (fileItem.getType() == FileType.OUTPUT
+                                                && fileItem.getName().equals(file.getName())){//相互依赖的任务
+                                            int parentJobVmId = tempJob.getVmId();
+                                            int parentJobuserId = tempJob.getUserId();
+                                            WorkflowScheduler tempWorkflow = (WorkflowScheduler)CloudSim.getEntity(parentJobuserId);
+                                            double tempParentVmbw = tempWorkflow.getVmList().get(parentJobVmId).getBw();
+                                            if(tempBwth > tempParentVmbw)
+                                            {
+                                                tempBwth = tempParentVmbw;
+                                            }
+                                            //任务调度在不同云，要计算云间通信量
+                                            if(parentJobuserId != userId && getName().equals("Datacenter_public")){
+                                                interTraffic += fileItem.getSize();
+                                            }
+                                        }
+                                    }
+                                }
                             }
                             if (bwth > maxBwth) {
                                 maxBwth = bwth;
@@ -390,5 +426,13 @@ public class WorkflowDatacenter extends Datacenter {
     }
     public void shutdownEntity() {
         Log.printLine(Parameters.df.format(CloudSim.clock())+getName() + " is shutting down...");
+    }
+
+    public double getInterTraffic() {
+        return interTraffic;
+    }
+
+    public void setInterTraffic(double interTraffic) {
+        this.interTraffic = interTraffic;
     }
 }

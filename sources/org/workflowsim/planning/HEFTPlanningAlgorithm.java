@@ -289,8 +289,11 @@ public class HEFTPlanningAlgorithm extends BasePlanningAlgorithm {
         earliestFinishTimes.put(task, earliestFinishTime);
 
         task.setVmId(chosenVM.getId());
+        task.setUserId(chosenVM.getUserId());//调度到对应的scheduler
         Log.printLine(Parameters.df.format(CloudSim.clock())+" :Planning " + task.getCloudletId() + " with  "
-                + task.getCloudletLength()+"  &arrivaleTime: "+ Parameters.df.format(task.getArrivalTime()) + " to VM " + task.getVmId());
+                + task.getCloudletLength()+"  &arrivaleTime: "+ Parameters.df.format(task.getArrivalTime())
+                + " to Scheduler " + task.getUserId()
+                + " VM " + task.getVmId());
 
     }
 

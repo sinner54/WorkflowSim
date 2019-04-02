@@ -54,6 +54,11 @@ public class CondorVM extends Vm {
      */
     private double cost = 0.0;
 
+    private double costPerSecurity = 0.0;
+
+    private double startTime = Double.MAX_VALUE;
+
+    private double finishTime = -1;
     /**
      * Creates a new CondorVM object.
      *
@@ -91,8 +96,28 @@ public class CondorVM extends Vm {
          * At the beginning all vm status is idle. 
          */
         setState(WorkflowSimTags.VM_STATUS_IDLE);
-    }
 
+    }
+    public CondorVM(
+            int id,
+            int userId,
+            double mips,
+            int numberOfPes,
+            int ram,
+            long bw,
+            long size,
+            String vmm,
+            double cost,
+            double costPerMem,
+            double costPerStorage,
+            double costPerBW,
+            CloudletScheduler cloudletScheduler) {
+        this(id, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler);
+        this.cost = cost;
+        this.costPerBW = costPerBW;
+        this.costPerMem = costPerMem;
+        this.costPerStorage = costPerStorage;
+    }
     /**
      * Creates a new CondorVM object.
      *
@@ -132,12 +157,14 @@ public class CondorVM extends Vm {
             double costPerMem,
             double costPerStorage,
             double costPerBW,
+            double costPerSecurity,
             CloudletScheduler cloudletScheduler) {
         this(id, userId, mips, numberOfPes, ram, bw, size, vmm, cloudletScheduler);
         this.cost = cost;
         this.costPerBW = costPerBW;
         this.costPerMem = costPerMem;
         this.costPerStorage = costPerStorage;
+        this.costPerSecurity = costPerSecurity;
     }
 
     /**
@@ -194,5 +221,29 @@ public class CondorVM extends Vm {
      */
     public final int getState() {
         return this.state;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public double getCostPerSecurity() {
+        return costPerSecurity;
+    }
+
+    public double getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(double startTime) {
+        this.startTime = startTime;
+    }
+
+    public double getFinishTime() {
+        return finishTime;
+    }
+
+    public void setFinishTime(double finishTime) {
+        this.finishTime = finishTime;
     }
 }
