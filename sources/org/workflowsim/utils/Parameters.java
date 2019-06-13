@@ -29,14 +29,13 @@ import org.cloudbus.cloudsim.Log;
  */
 public class Parameters {
 
-    public static final String daxFilePath="E:\\myprojects\\WorkflowSim\\config\\dax\\";
+    public static final String daxFilePath="D:\\myprojects\\WorkflowSim\\config\\dax\\";
     
     /*
      * Scheduling Algorithm (Local Scheduling Algorithm)
      */
 
     public enum SchedulingAlgorithm {
-
         MAXMIN, MINMIN, MCT, DATA, 
         STATIC, FCFS, ROUNDROBIN, INVALID
     }

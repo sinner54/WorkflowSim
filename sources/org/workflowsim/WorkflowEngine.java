@@ -229,7 +229,7 @@ public final class WorkflowEngine extends SimEntity {
         getJobsList().remove(job);
         if (getJobsList().isEmpty() && jobsSubmitted == 0) {
             //send msg to all the schedulers
-            Log.printLine(Parameters.df.format(CloudSim.clock())+"all jobs has completed");
+            Log.printLine(Parameters.df.format(CloudSim.clock())+": "+getJobsReceivedList().size() +"jobs has completed");
             for (int i = 0; i < getSchedulerIds().size(); i++) {
                 sendNow(getSchedulerId(i), CloudSimTags.END_OF_SIMULATION, null);
             }

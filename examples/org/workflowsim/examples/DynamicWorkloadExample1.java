@@ -54,17 +54,17 @@ public class DynamicWorkloadExample1 extends WorkflowSimBasicExample1 {
 
         for (int i = 0; i < vms; i++) {
             double ratio = 1.0;
-            vm[i] = new CondorVM(i, userId, mips * ratio, pesNumber, ram, bw, size, vmm,1,0,0,0,0.6,new CloudletSchedulerDynamicWorkload(mips * ratio, pesNumber));
+            vm[i] = new CondorVM(i, userId, mips * ratio, pesNumber, ram, bw, size, vmm,1,0,0,0,0.6,new CloudletSchedulerTimeShared());
             list.add(vm[i]);
         }
         for (int i = vms; i < vms * 2; i++) {
             double ratio = 2.0;
-            vm[i] = new CondorVM(i, userId, mips * ratio, pesNumber, ram, bw, size, vmm,1.9,0,0,0,0.8,new CloudletSchedulerDynamicWorkload(mips * ratio, pesNumber));
+            vm[i] = new CondorVM(i, userId, mips * ratio, pesNumber, ram, bw, size, vmm,1.9,0,0,0,0.8,new CloudletSchedulerTimeShared());
             list.add(vm[i]);
         }
         for (int i = 2 * vms; i < vms * 3; i++) {
             double ratio = 4.0;
-            vm[i] = new CondorVM(i, userId, mips * ratio, pesNumber, ram, bw, size, vmm,3.8,0,0,0,1, new CloudletSchedulerDynamicWorkload(mips * ratio, pesNumber));
+            vm[i] = new CondorVM(i, userId, mips * ratio, pesNumber, ram, bw, size, vmm,3.8,0,0,0,1, new CloudletSchedulerTimeShared());
             list.add(vm[i]);
         }
         return list;
@@ -86,12 +86,12 @@ public class DynamicWorkloadExample1 extends WorkflowSimBasicExample1 {
 
         for (int i = 0; i < vms; i++) {
             double ratio = 1.0;
-            vm[i] = new CondorVM(i, userId, mips * ratio, pesNumber, ram, bw, size, vmm,0,0,0,0,1, new CloudletSchedulerDynamicWorkload(mips * ratio, pesNumber));
+            vm[i] = new CondorVM(i, userId, mips * ratio, pesNumber, ram, bw, size, vmm,0,0,0,0,1, new CloudletSchedulerTimeShared());
             list.add(vm[i]);
         }
         for (int i = vms; i < vms * 2; i++) {
             double ratio = 2.0;
-            vm[i] = new CondorVM(i, userId, mips * ratio, pesNumber, ram, bw, size, vmm,0,0,0,0,1, new CloudletSchedulerDynamicWorkload(mips * ratio, pesNumber));
+            vm[i] = new CondorVM(i, userId, mips * ratio, pesNumber, ram, bw, size, vmm,0,0,0,0,1, new CloudletSchedulerTimeShared());
             list.add(vm[i]);
         }
         return list;
@@ -153,8 +153,8 @@ public class DynamicWorkloadExample1 extends WorkflowSimBasicExample1 {
             Parameters.init(vmNum,daxPath, null,
                     null, op, cp, sch_method, pln_method,
                     null, 0);
-            DistributionGenerator tempDistributionGenerator = new DistributionGenerator(DistributionGenerator.DistributionFamily.WEIBULL, 0.9d, 3);
-            Parameters.setArrivalTimeModel(tempDistributionGenerator);
+//            DistributionGenerator tempDistributionGenerator = new DistributionGenerator(DistributionGenerator.DistributionFamily.WEIBULL, 0.9d, 3);
+//            Parameters.setArrivalTimeModel(tempDistributionGenerator);
             ReplicaCatalog.init(file_system);
 
             // before creating any entities.
