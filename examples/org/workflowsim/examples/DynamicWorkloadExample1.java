@@ -27,75 +27,19 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.workflowsim.*;
 import org.workflowsim.utils.*;
 
+import static org.workflowsim.examples.WorkflowUtils.createPrivateVM;
+import static org.workflowsim.examples.WorkflowUtils.printJobRFT;
+
 /**
  * This DynamicWorkloadExample1 uses specifically
  * CloudletSchedulerDynamicWorkload as the local scheduler;
+ * 单工作流 单个云 实验
  *
  * @author Weiwei Chen
  * @since WorkflowSim Toolkit 1.0
  * @date Oct 13, 2013
  */
 public class DynamicWorkloadExample1 extends WorkflowSimBasicExample1 {
-
-    protected static List<CondorVM> createPublicVM(int userId, int vms) {
-
-        //Creates a container to store VMs. This list is passed to the broker later
-        LinkedList<CondorVM> list = new LinkedList<>();
-
-        //VM Parameters
-        long size = 10000; //image size (MB)
-        int ram = 512; //vm memory (MB)
-        int mips = 1000;
-        long bw = 1000;
-        int pesNumber = 1; //number of cpus
-        String vmm = "Xen"; //VMM name
-        //create VMs
-        CondorVM[] vm = new CondorVM[vms * 3];
-
-        for (int i = 0; i < vms; i++) {
-            double ratio = 1.0;
-            vm[i] = new CondorVM(i, userId, mips * ratio, pesNumber, ram, bw, size, vmm,1,0,0,0,0.6,new CloudletSchedulerTimeShared());
-            list.add(vm[i]);
-        }
-        for (int i = vms; i < vms * 2; i++) {
-            double ratio = 2.0;
-            vm[i] = new CondorVM(i, userId, mips * ratio, pesNumber, ram, bw, size, vmm,1.9,0,0,0,0.8,new CloudletSchedulerTimeShared());
-            list.add(vm[i]);
-        }
-        for (int i = 2 * vms; i < vms * 3; i++) {
-            double ratio = 4.0;
-            vm[i] = new CondorVM(i, userId, mips * ratio, pesNumber, ram, bw, size, vmm,3.8,0,0,0,1, new CloudletSchedulerTimeShared());
-            list.add(vm[i]);
-        }
-        return list;
-    }
-    protected static List<CondorVM> createPrivateVM(int userId, int vms) {
-
-        //Creates a container to store VMs. This list is passed to the broker later
-        LinkedList<CondorVM> list = new LinkedList<>();
-
-        //VM Parameters
-        long size = 10000; //image size (MB)
-        int ram = 512; //vm memory (MB)
-        int mips = 1000;
-        long bw = 1000;
-        int pesNumber = 1; //number of cpus
-        String vmm = "Xen"; //VMM name
-        //create VMs
-        CondorVM[] vm = new CondorVM[vms * 3];
-
-        for (int i = 0; i < vms; i++) {
-            double ratio = 1.0;
-            vm[i] = new CondorVM(i, userId, mips * ratio, pesNumber, ram, bw, size, vmm,0,0,0,0,1, new CloudletSchedulerTimeShared());
-            list.add(vm[i]);
-        }
-        for (int i = vms; i < vms * 2; i++) {
-            double ratio = 2.0;
-            vm[i] = new CondorVM(i, userId, mips * ratio, pesNumber, ram, bw, size, vmm,0,0,0,0,1, new CloudletSchedulerTimeShared());
-            list.add(vm[i]);
-        }
-        return list;
-    }
 
     ////////////////////////// STATIC METHODS ///////////////////////
     /**
@@ -118,7 +62,7 @@ public class DynamicWorkloadExample1 extends WorkflowSimBasicExample1 {
              */
             List<String> daxPaths = new ArrayList<>();
 
-            String daxPath = Parameters.daxFilePath+"Montage_1000.xml";
+            String daxPath = Parameters.daxFilePath+"Montage_100.xml";
             File daxFile = new File(daxPath);
             if (!daxFile.exists()) {
                 Log.printLine("Warning: Please replace daxPath with the physical path in your working environment!");
@@ -166,12 +110,10 @@ public class DynamicWorkloadExample1 extends WorkflowSimBasicExample1 {
             CloudSim.init(num_user, calendar, trace_flag);
 
             WorkflowDatacenter datacenter0 = createDatacenter("Datacenter_private");
-            WorkflowDatacenter datacenter1 = createDatacenter("Datacenter_public");
-            WorkflowDatacenter datacenter2 = createDatacenter("Datacenter_public");
             /**
              * Create a WorkflowPlanner with one schedulers.
              */
-            WorkflowPlanner wfPlanner = new WorkflowPlanner("planner_0", 3);
+            WorkflowPlanner wfPlanner = new WorkflowPlanner("planner_0", 1);
             /**
              * Create a WorkflowEngine.
              */
@@ -181,127 +123,30 @@ public class DynamicWorkloadExample1 extends WorkflowSimBasicExample1 {
              * the scheduler that controls this vm.
              */
             List<CondorVM> vmlist0 = createPrivateVM(wfEngine.getSchedulerId(0), 3);
-            List<CondorVM> vmlist1 = createPublicVM(wfEngine.getSchedulerId(1), 4);
-            List<CondorVM> vmlist2 = createPublicVM(wfEngine.getSchedulerId(2), 4);
             /**
              * Submits this list of vms to this WorkflowEngine.
              */
             wfEngine.submitVmList(vmlist0, 0);
-            wfEngine.submitVmList(vmlist1,1);
-            wfEngine.submitVmList(vmlist2,2);
             /**
              * Binds the data centers with the scheduler.
              */
             wfEngine.bindSchedulerDatacenter(datacenter0.getId(), 0);
-            wfEngine.bindSchedulerDatacenter(datacenter1.getId(), 1);
-            wfEngine.bindSchedulerDatacenter(datacenter2.getId(), 2);
 
             CloudSim.startSimulation();
             List<Job> outputListjob = wfEngine.getJobsReceivedList();
             List<? extends Vm> outputListVms = wfEngine.getAllVmList();
             List<WorkflowDatacenter> outputListDatecenters= new LinkedList<>();
             outputListDatecenters.add(datacenter0);
-            outputListDatecenters.add(datacenter1);
-            outputListDatecenters.add(datacenter2);
             CloudSim.stopSimulation();
             printJobRFT(outputListjob);
-            printJobFT(outputListVms);
-            printInterTraffic(outputListDatecenters);
+
         } catch (Exception e) {
             Log.printLine("The simulation has been terminated due to an unexpected error" );
             e.printStackTrace();
         }
     }
 
-    /**
-     *云间通信量
-     * @param outputListDatecenters
-     */
-    private static void printInterTraffic(List<WorkflowDatacenter> outputListDatecenters) {
-        String indent = "    ";
-        Log.printLine();
-        Log.printLine("========== OUTPUT ==========");
-        DecimalFormat dft = new DecimalFormat("###.##");
-        double totalInterTraffic = 0;
-        Log.printLine("WorkflowDatacenter ID" + indent + "name"+ indent + indent +indent +"intertrafficSize(KB)");
-        for(WorkflowDatacenter tempDatacenter:outputListDatecenters){
-            Log.printLine(indent +indent +tempDatacenter.getId() + indent +indent +indent + tempDatacenter.getName()+ indent + tempDatacenter.getInterTraffic());
-            totalInterTraffic += tempDatacenter.getInterTraffic();
-        }
-        Log.printLine("========== InterTraffic==========");
-        Log.printLine("InterTraffic Num(MB):"+indent+totalInterTraffic/(1024*1024));
 
-    }
 
-    /**
-     *
-     * @param outputListVms
-     */
-    private static void printJobFT(List<? extends Vm> outputListVms) {
-        String indent = "    ";
-        Log.printLine();
-        Log.printLine("========== OUTPUT ==========");
 
-        Log.printLine("Vm ID" + indent + "startTime" + indent + "FinishTime"+indent + "costPer"+ indent + "cost");
-        DecimalFormat dft = new DecimalFormat("###.##");
-        double totalCost = 0;
-        for (Vm vm : outputListVms) {
-            CondorVM tempVm = (CondorVM)vm;
-            if(tempVm.getStartTime() != Double.MAX_VALUE && tempVm.getFinishTime() != -1) {
-                double cost = Math.ceil((tempVm.getFinishTime() - tempVm.getStartTime())/60) * tempVm.getCost();
-                Log.printLine(vm.getUid() + indent + dft.format(tempVm.getStartTime())+
-                        indent + dft.format(tempVm.getFinishTime())+
-                        indent + dft.format(tempVm.getCost())+
-                        indent + dft.format(cost));
-                totalCost += cost;
-            }
-        }
-        Log.printLine("========== Workflow cost==========");
-        Log.printLine("Workflow public cost:"+indent+totalCost);
-    }
-
-    /**
-     *
-     * @param outputListjob
-     */
-    private static void printJobRFT(List<Job> outputListjob) {
-        String indent = "    ";
-        Log.printLine();
-        Log.printLine("========== OUTPUT ==========");
-        Log.printLine("Job ID" + indent + "Task ID" + indent + "STATUS" + indent
-                + "Data center ID" + indent + "VM ID" + indent + indent
-                + "Time" + indent + "Start Time" + indent + "Finish Time" + indent + "Depth");
-        DecimalFormat dft = new DecimalFormat("###.##");
-        double realFinishTime = -1;
-        for (Job job : outputListjob) {
-            Log.print(indent + job.getCloudletId() + indent + indent);
-            if (job.getClassType() == Parameters.ClassType.STAGE_IN.value) {
-                Log.print("Stage-in");
-            }
-            for (Task task : job.getTaskList()) {
-                Log.print(task.getCloudletId() + ",");
-            }
-            Log.print(indent);
-
-            if (job.getCloudletStatus() == Cloudlet.SUCCESS) {
-                Log.print("SUCCESS");
-                Log.printLine(indent + indent + job.getResourceId() + indent + indent + indent + job.getVmId()
-                        + indent + indent + indent + dft.format(job.getActualCPUTime())
-                        + indent + indent + dft.format(job.getExecStartTime()) + indent + indent + indent
-                        + dft.format(job.getFinishTime()) + indent + indent + indent + job.getDepth());
-            } else if (job.getCloudletStatus() == Cloudlet.FAILED) {
-                Log.print("FAILED");
-                Log.printLine(indent + indent + job.getResourceId() + indent + indent + indent + job.getVmId()
-                        + indent + indent + indent + dft.format(job.getActualCPUTime())
-                        + indent + indent + dft.format(job.getExecStartTime()) + indent + indent + indent
-                        + dft.format(job.getFinishTime()) + indent + indent + indent + job.getDepth());
-            }
-            double tempjobfinishtime = job.getFinishTime();
-            if (tempjobfinishtime > realFinishTime){
-                realFinishTime = tempjobfinishtime;
-            }
-        }
-        Log.printLine("========== Jobs Size=========="+outputListjob.size());
-        Log.printLine("WorkflowFinishTime:"+indent+dft.format(realFinishTime));
-    }
 }
